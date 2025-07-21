@@ -51,18 +51,22 @@ class PIDLongitudinalController():
             :param current_speed: current speed of the vehicle in Km/h
             :return: throttle/brake control
         """
- 
+
+        # P-Controller
         error = target_speed - current_speed
         self._error_buffer.append(error)
 
         ###################### TODO ######################
         if len(self._error_buffer) >= 2:
+            #derivative
             _de = (self._error_buffer[-1] - self._error_buffer[-2]) / self._dt ##TODO
+            #integral
             _ie = sum(self._error_buffer) * self._dt ##TODO
         else:
             _de = 0.0
             _ie = 0.0
-        
+
+        #output throttle
         control = self._k_p * error + self._k_i * _ie + self._k_d * _de ##TODO
  
         return np.clip(control, -1.0, 1.0)
@@ -142,11 +146,15 @@ class PIDLateralController():
                           0.0])
         
         ###################### TODO ######################
+        #norm of the vector between the target waypoint and the directional vector of the vehicle
         wv_linalg = np.linalg.norm(w_vec) * np.linalg.norm(v_vec)
+        # in the case where the norm is null
         if wv_linalg == 0:
             _dot = 1
         else:
+            # compute the angle between both vectors using scalar product & norm
             _dot = math.acos(np.clip(np.dot(w_vec, v_vec) / (wv_linalg), -1.0, 1.0))
+        # direction of the rotation (left or right)
         _cross = np.cross(v_vec, w_vec)
         #change the sign of the dot product depending on if we are turning left or right
         if _cross[2] < 0:
@@ -154,13 +162,17 @@ class PIDLateralController():
  
         self._e_buffer.append(_dot)
 
+        #compute the derival term & integral term
         if len(self._e_buffer) >= 2:
+            # difference between the 2 last errors for derivative
             _de = (self._e_buffer[-1] - self._e_buffer[-2]) / self._dt ##TODO
+            # sum of previous errors time the step time for integral
             _ie = sum(self._e_buffer) * self._dt ##TODO
         else:
+            # in the case where the historic of errors is not enough filled (i.e, first iteration)
             _de = 0.0
             _ie = 0.0
-
+        #throttle
         control = self._k_p * _dot + self._k_i * _ie + self._k_d * _de ##TODO
  
         return np.clip(control, -1.0, 1.0)

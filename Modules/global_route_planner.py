@@ -288,30 +288,40 @@ class GlobalRoutePlanner(object):
         return np.linalg.norm(l1-l2)
     
     def astar_path(self, G, source, target, heuristic=None, weight="weight"):
+        # obviously, we have to verify that the source & target nodes exist in the graph
         if source not in G:
              nx.NodeNotFound(f"Source {source} is not in G")
 
         if target not in G:
             raise nx.NodeNotFound(f"Target {target} is not in G")
 
+        # If no heuristic is given, we use the null heuristic (= Djistra Algorithm)
         if heuristic is None:
             def heuristic(u, v):
                 return 0
 
+        #initialization of push & pop method
         push = heappush
         pop = heappop
+        # function to get weight of edges in the graph
         weight = _weight_function(G, weight)
+        # quick access to successors of nodes in the graph
         G_succ = G._adj
-
+        # initialization of counter to be sure that nodes are uniquely sorted
         c = count()
+        # each element in the queue is a tuple with total cosst + counter + actual node + cumulate cost + parent
         queue = [(0, next(c), source, 0, None)]
 
+        # dictionnary to stock nodes already explored and their parents
         enqueued = {}
+        # dictiony to follow the cost of nodes in the queue
         explored = {}
 
+        # we continue until the priority queue is empty
         while queue:
+            # we extract the node with the weakest total cost
             _, __, curnode, dist, parent = pop(queue)
-                
+            # if the actual node is the target node, we stop
             if curnode == target:
                 path = [curnode]
                 node = parent
@@ -320,32 +330,36 @@ class GlobalRoutePlanner(object):
                     node = explored[node]
                 path.reverse()
                 return path
-
+            # if the node was already explored, we can jump into the next iteration
             if curnode in explored:
                 if explored[curnode] is None:
                     continue
+                # verify if a better way has already be founded
                 qcost, h = enqueued[curnode]
                 if qcost < dist:
                     continue
-                    
+            # mark the node as explored with his parent
             explored[curnode] = parent
-
+            # traverses all neighbord of the current node
             for neighbor, w in G_succ[curnode].items():
+                # compute the cost between the current node and the neighbor
                 cost = weight(curnode, neighbor, w)
                 if cost is None:
                     continue
+                # cumulate cost until this neighbor
                 ncost = dist + cost
+                # evaluation of the heuristic for the neighbor
                 h = heuristic(neighbor, target)
-                    
+
+                # verify if the neighbor is already in the queue with a better cost
                 if neighbor in enqueued:
                     qcost, _ = enqueued[neighbor]
                     if qcost <= ncost:
                         continue
-
+                # update the cost of neighbor
                 enqueued[neighbor] = (ncost, h)
                 push(queue, (ncost + h, next(c), neighbor, ncost, curnode))
 
-        # Correctement placé en dehors du while
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
 

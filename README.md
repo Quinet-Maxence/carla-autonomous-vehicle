@@ -109,14 +109,23 @@ pip install ultralytics==8.3.14 torch==2.4.1 torchvision torchaudio
 ```
 
 ### **3. Run the Simulation**
+
+a. Open a cmd at : "\WindowsNoEditor" and tap CarlaUE4.exe
+
+b. Open a cmd at : "WindowsNoEditor\PythonAPI\Modules" and tap :
+
 ```bash
-python manual_control.py --host <remote-host-ip>
 python Simulation_Control.py
+```
+
+OR : 
+
+```bash
 python Simulation_Perception.py -m <path-to-model> -a Custom
 ```
 
 ## 📜 Credits
-- **Author** : Maxence QUINET & Raphaël Frank
+- **Author** : Maxence QUINET
 - **Simulator**: [CARLA Open Source](https://carla.org/)  
 
 ## 🎥 Demo (Click on the Thumbnail)
