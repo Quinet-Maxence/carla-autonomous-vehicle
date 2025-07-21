@@ -1,5 +1,5 @@
 <h1 align="center">
-🚗 Autonomous Vehicle with CARLA Simulator (TESLA) 🧠
+🚗 Autonomous Vehicle & Connected with CARLA Simulator (TESLA) 🧠
 </h1>
 
 ![GitHub Repo Stars](https://img.shields.io/github/stars/Quinet-Maxence/carla-autonomous-vehicle?style=social)  
